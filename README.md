@@ -4,7 +4,7 @@ This repository is for the **ICCV 2021** paper [[arxiv paper]]().
 
 Chaoda Zheng, [Xu Yan](https://github.com/yanx27), Jiaotao Gao, Weibing Zhao, Wei Zhang, [Zhen Li*](https://mypage.cuhk.edu.cn/academics/lizhen/), Shuguang Cui
 
-![](figures/results.gif)
+<img src="figures/results.gif" width="1000"/>
 
 If you find our work useful in your research, please consider citing:
 ```
