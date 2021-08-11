@@ -2,7 +2,7 @@
 ### Box-Aware Feature Enhancement for Single Object Tracking on Point Clouds
 This repository is for the **ICCV 2021** paper [[arxiv paper]](https://arxiv.org/pdf/2108.04728.pdf).
 
-Chaoda Zheng, [Xu Yan](https://github.com/yanx27), Jiaotao Gao, Weibing Zhao, Wei Zhang, [Zhen Li*](https://mypage.cuhk.edu.cn/academics/lizhen/), Shuguang Cui
+Chaoda Zheng, [Xu Yan](https://yanx27.github.io/), Jiaotao Gao, Weibing Zhao, Wei Zhang, [Zhen Li*](https://mypage.cuhk.edu.cn/academics/lizhen/), Shuguang Cui
 
 <img src="figures/results.gif" width="1000"/>
 
