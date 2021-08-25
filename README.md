@@ -1,7 +1,9 @@
 # Box-Aware Tracker (BAT)
-Code release for the **ICCV 2021** paper [Box-Aware Feature Enhancement for Single Object Tracking on Point Clouds](https://arxiv.org/pdf/2108.04728.pdf).
+Pytorch implementation of the Box-Aware Tracker.  
 
-Chaoda Zheng, [Xu Yan](https://yanx27.github.io/), Jiaotao Gao, Weibing Zhao, Wei Zhang, [Zhen Li*](https://mypage.cuhk.edu.cn/academics/lizhen/), Shuguang Cui
+[Box-Aware Feature Enhancement for Single Object Tracking on Point Clouds](https://arxiv.org/pdf/2108.04728.pdf). **ICCV 2021** 
+
+[Chaoda Zheng](https://github.com/Ghostish/), [Xu Yan](https://yanx27.github.io/), Jiaotao Gao, Weibing Zhao, Wei Zhang, [Zhen Li*](https://mypage.cuhk.edu.cn/academics/lizhen/), Shuguang Cui
 
 ### Citation
 ```bibtex
@@ -40,7 +42,7 @@ Installation
 
 KITTI dataset
 + Download the data for [velodyne](http://www.cvlibs.net/download.php?file=data_tracking_velodyne.zip), [calib](http://www.cvlibs.net/download.php?file=data_tracking_calib.zip) and [label_02](http://www.cvlibs.net/download.php?file=data_tracking_label_2.zip) from [KITTI Tracking](http://www.cvlibs.net/datasets/kitti/eval_tracking.php).
-+ Unzip the downloaded files
++ Unzip the downloaded files.
 + Put the unzipped files under the same folder as following.
   ```
   [Parent Folder]
