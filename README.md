@@ -1,5 +1,5 @@
 # Box-Aware Tracker (BAT)
-Pytorch implementation of the Box-Aware Tracker.  
+Pytorch-Lightning implementation of the Box-Aware Tracker.  
 
 [Box-Aware Feature Enhancement for Single Object Tracking on Point Clouds](https://arxiv.org/pdf/2108.04728.pdf). **ICCV 2021** 
 
