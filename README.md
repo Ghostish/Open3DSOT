@@ -22,7 +22,7 @@ Pytorch-Lightning implementation of the Box-Aware Tracker.
 + Provide a 3rd party implementation of [P2B](https://github.com/HaozheQi/P2B).
 ### Setup
 Installation
-+ create the environment
++ Create the environment
   ```
   git clone https://github.com/Ghostish/BAT.git
   cd BAT
@@ -93,3 +93,5 @@ python main.py --gpu 0 1 --cfg cfgs/BAT_Car.yaml  --checkpoint ./pretrained_mode
 + This repo is built upon [P2B](https://github.com/HaozheQi/P2B) and [SC3D](https://github.com/SilvioGiancola/ShapeCompletion3DTracking).
 + Thank Erik Wijmans for his pytorch implementation of [PointNet++](https://github.com/erikwijmans/Pointnet2_PyTorch)
 
+### License
+This repository is released under MIT License (see LICENSE file for details).
