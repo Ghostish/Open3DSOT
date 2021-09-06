@@ -3,13 +3,13 @@ Pytorch-Lightning implementation of the Box-Aware Tracker.
 
 [Box-Aware Feature Enhancement for Single Object Tracking on Point Clouds](https://arxiv.org/pdf/2108.04728.pdf). **ICCV 2021** 
 
-[Chaoda Zheng](https://github.com/Ghostish/), [Xu Yan](https://yanx27.github.io/), Jiaotao Gao, Weibing Zhao, Wei Zhang, [Zhen Li*](https://mypage.cuhk.edu.cn/academics/lizhen/), Shuguang Cui
+[Chaoda Zheng](https://github.com/Ghostish/), [Xu Yan](https://yanx27.github.io/), Jiantao Gao, Weibing Zhao, Wei Zhang, [Zhen Li*](https://mypage.cuhk.edu.cn/academics/lizhen/), Shuguang Cui
 
 ### Citation
 ```bibtex
 @InProceedings{zheng2021box,
   title={Box-Aware Feature Enhancement for Single Object Tracking on Point Clouds},
-  author={Chaoda Zheng, Xu Yan, Jiaotao Gao, Weibing Zhao, Wei Zhang, Zhen Li, Shuguang Cui},
+  author={Chaoda Zheng, Xu Yan, Jiantao Gao, Weibing Zhao, Wei Zhang, Zhen Li, Shuguang Cui},
   journal={ICCV},
   year={2021}
 }
