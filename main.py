@@ -59,8 +59,8 @@ else:
     net = get_model(cfg.net_model).load_from_checkpoint(cfg.checkpoint, config=cfg)
 if not cfg.test:
     # dataset and dataloader
-    train_data = get_dataset(cfg, type='train', split='train')
-    val_data = get_dataset(cfg, type='test', split='test')
+    train_data = get_dataset(cfg, type='train', split=cfg.train_split)
+    val_data = get_dataset(cfg, type='test', split=cfg.val_split)
     train_loader = DataLoader(train_data, batch_size=cfg.batch_size, num_workers=cfg.workers, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=1, num_workers=cfg.workers, collate_fn=lambda x: x)
     checkpoint_callback = ModelCheckpoint(monitor='precision/test', mode='max', save_last=True,
@@ -72,7 +72,7 @@ if not cfg.test:
                          check_val_every_n_epoch=cfg.check_val_every_n_epoch)
     trainer.fit(net, train_loader, val_loader)
 else:
-    test_data = get_dataset(cfg, type='test', split='test')
+    test_data = get_dataset(cfg, type='test', split=cfg.test_split)
     test_loader = DataLoader(test_data, batch_size=1, num_workers=cfg.workers, collate_fn=lambda x: x)
 
     trainer = pl.Trainer(gpus=cfg.gpu, accelerator='ddp')

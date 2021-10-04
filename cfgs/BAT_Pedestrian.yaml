@@ -15,6 +15,10 @@ box_aware: True
 num_candidates: 4
 coordinate_mode: velodyne
 up_axis: [0,0,1]
+train_split: train
+val_split: test
+test_split: test
+preload_offset: 10
 
 #model configuration
 net_model: BAT

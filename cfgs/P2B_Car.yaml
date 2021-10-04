@@ -14,6 +14,10 @@ degrees: True # use degrees or radians
 num_candidates: 4
 coordinate_mode: camera
 up_axis: [0,-1,0]
+train_split: train
+val_split: test
+test_split: test
+preload_offset: 10
 
 #model configuration
 net_model: P2B

@@ -16,8 +16,10 @@ Pytorch-Lightning implementation of the Box-Aware Tracker.
 ```
 <img src="figures/results.gif" width="1000"/>
 
+### News
+Codes for NuScences dataset are released!
 ### Features
-+ Modular design. It is easy to config the model and trainng/testing behaviors through just a `.yaml` file.
++ Modular design. It is easy to config the model and training/testing behaviors through just a `.yaml` file.
 + DDP support for both training and testing.
 + Provide a 3rd party implementation of [P2B](https://github.com/HaozheQi/P2B).
 ### Setup
@@ -35,9 +37,13 @@ Installation
   ```
   Our code is well tested with pytorch 1.4.0 and CUDA 10.1. But other platforms may also work. Follow [this](https://pytorch.org/get-started/locally/) to install another version of pytorch. **Note: In order to reproduce the reported results with the provided checkpoints, please use CUDA 10.x.** 
 
-+ Install other dependencies
++ Install other dependencies:
   ```
   pip install -r requirement.txt
+  ```
+  Install the nuscenes-devkit if you use want to use NuScenes dataset:
+  ```
+  pip install nuscenes-devkit
   ```
 
 KITTI dataset
@@ -53,9 +59,21 @@ KITTI dataset
   --> [velodyne]
       --> [0000-0020] folders with velodynes .bin files
   ```
+
+NuScenes dataset
++ Download the dataset from the [download page](https://www.nuscenes.org/download)
++ Extract the downloaded files and make sure you have the following structure:
+  ```
+  [Parent Folder]
+    samples	-	Sensor data for keyframes.
+    sweeps	-	Sensor data for intermediate frames.
+    maps	-	Folder for all map files: rasterized .png images and vectorized .json files.
+    v1.0-*	-	JSON tables that include all the meta data and annotations. Each split (trainval, test, mini) is provided in a separate folder.
+  ```
+>Note: We use the **train_track** split to train our model and test it with the **val** split. Both splits are officially provided by NuScenes. During testing, we ignore the sequences where there is no point in the first given bbox.
 ### Quick Start
 #### Training
-To train a model, you must specify the `.yaml` file with `--cfg` argument. The `.yaml` file contains all the configurations of the dataset and the model. Currently, we provide three `.yaml` files under the [*cfgs*](./cfgs) directory. **Note:** Before running the code, you will need to edit the `.yaml` file by setting the `path` argument as the correct root of the dataset.
+To train a model, you must specify the `.yaml` file with `--cfg` argument. The `.yaml` file contains all the configurations of the dataset and the model. Currently, we provide four `.yaml` files under the [*cfgs*](./cfgs) directory. **Note:** Before running the code, you will need to edit the `.yaml` file by setting the `path` argument as the correct root of the dataset.
 ```bash
 python main.py --gpu 0 1 --cfg cfgs/BAT_Car.yaml  --batch_size 50 --epoch 60
 ```
@@ -74,10 +92,11 @@ python main.py --gpu 0 1 --cfg cfgs/BAT_Car.yaml  --checkpoint /path/to/checkpoi
 This codebase produces better results than those we report in our original paper.
 | Model | Category | Success| Precision| Checkpoint
 |--|--|--|--|--|
-| BAT | Car	|65.37 | 78.88|pretrained_models/bat_kitti_car.ckpt
-| BAT | Pedestrian | 45.74| 74.53| pretrained_models/bat_kitti_pedestrian.ckpt
+| BAT-KITTI | Car	|65.37 | 78.88|pretrained_models/bat_kitti_car.ckpt
+| BAT-NuScenes | Car	|40.73 | 43.29|pretrained_models/bat_nuscenes_car.ckpt
+| BAT-KITTI | Pedestrian | 45.74| 74.53| pretrained_models/bat_kitti_pedestrian.ckpt
 
-Two Trained BAT models for KITTI dataset are provided in the  [*pretrained_models*](./pretrained_models) directory. To reproduce the results, simply run the code with the corresponding `.yaml` file and checkpoint. For example, to reproduce the tracking results on Car, just run:
+Three trained BAT models for KITTI and NuScenes datasets are provided in the  [*pretrained_models*](./pretrained_models) directory. To reproduce the results, simply run the code with the corresponding `.yaml` file and checkpoint. For example, to reproduce the tracking results on KITTI Car, just run:
 ```bash
 python main.py --gpu 0 1 --cfg cfgs/BAT_Car.yaml  --checkpoint ./pretrained_models/bat_kitti_car.ckpt --test
 ```
@@ -85,7 +104,7 @@ python main.py --gpu 0 1 --cfg cfgs/BAT_Car.yaml  --checkpoint ./pretrained_mode
 ### To-dos
 - [x] DDP support
 - [x] Multi-gpus testing
-- [ ] Add NuScenes dataset
+- [x] Add NuScenes dataset
 - [ ] Add codes for visualization
 - [ ] Add support for more methods
 

@@ -12,14 +12,13 @@ import os
 import warnings
 import pickle
 from collections import defaultdict
-from datasets import points_utils
+from datasets import points_utils, base_dataset
 
 
-class kittiDataset():
+class kittiDataset(base_dataset.BaseDataset):
     def __init__(self, path, split, category_name="Car", **kwargs):
+        super().__init__(path, split, category_name, **kwargs)
         self.KITTI_Folder = path
-        self.category_name = category_name
-        self.split = split
         self.KITTI_velo = os.path.join(self.KITTI_Folder, "velodyne")
         self.KITTI_image = os.path.join(self.KITTI_Folder, "image_02")
         self.KITTI_label = os.path.join(self.KITTI_Folder, "label_02")
