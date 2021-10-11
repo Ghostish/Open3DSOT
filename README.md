@@ -1,7 +1,7 @@
 # Box-Aware Tracker (BAT)
 Pytorch-Lightning implementation of the Box-Aware Tracker.  
 
-[Box-Aware Feature Enhancement for Single Object Tracking on Point Clouds](https://arxiv.org/pdf/2108.04728.pdf). **ICCV 2021** 
+[Box-Aware Feature Enhancement for Single Object Tracking on Point Clouds](https://openaccess.thecvf.com/content/ICCV2021/papers/Zheng_Box-Aware_Feature_Enhancement_for_Single_Object_Tracking_on_Point_Clouds_ICCV_2021_paper.pdf). **ICCV 2021** 
 
 [Chaoda Zheng](https://github.com/Ghostish/), [Xu Yan](https://yanx27.github.io/), Jiantao Gao, Weibing Zhao, Wei Zhang, [Zhen Li*](https://mypage.cuhk.edu.cn/academics/lizhen/), Shuguang Cui
 
@@ -10,7 +10,8 @@ Pytorch-Lightning implementation of the Box-Aware Tracker.
 @InProceedings{zheng2021box,
   title={Box-Aware Feature Enhancement for Single Object Tracking on Point Clouds},
   author={Chaoda Zheng, Xu Yan, Jiantao Gao, Weibing Zhao, Wei Zhang, Zhen Li, Shuguang Cui},
-  journal={ICCV},
+  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
+  pages={13199-13208},
   year={2021}
 }
 ```
