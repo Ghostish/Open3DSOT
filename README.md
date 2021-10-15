@@ -17,8 +17,9 @@ Pytorch-Lightning implementation of the Box-Aware Tracker.
 ```
 <img src="figures/results.gif" width="1000"/>
 
-### News
-Codes for NuScences dataset are released!
+### Recent Updates
++ Add support for NuScenes
++ ...
 ### Features
 + Modular design. It is easy to config the model and training/testing behaviors through just a `.yaml` file.
 + DDP support for both training and testing.
