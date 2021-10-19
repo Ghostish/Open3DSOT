@@ -7,11 +7,11 @@ Pytorch-Lightning implementation of the Box-Aware Tracker.
 
 ### Citation
 ```bibtex
-@InProceedings{zheng2021box,
+@inproceedings{zheng2021box,
   title={Box-Aware Feature Enhancement for Single Object Tracking on Point Clouds},
-  author={Chaoda Zheng, Xu Yan, Jiantao Gao, Weibing Zhao, Wei Zhang, Zhen Li, Shuguang Cui},
+  author={Zheng, Chaoda and Yan, Xu and Gao, Jiantao and Zhao, Weibing and Zhang, Wei and Li, Zhen and Cui, Shuguang},
   booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
-  pages={13199-13208},
+  pages={13199--13208},
   year={2021}
 }
 ```
