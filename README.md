@@ -18,6 +18,7 @@ Pytorch-Lightning implementation of the Box-Aware Tracker.
 <img src="figures/results.gif" width="1000"/>
 
 ### Recent Updates
++ Add support for Waymo
 + Add support for NuScenes
 + ...
 ### Features
@@ -73,6 +74,23 @@ NuScenes dataset
     v1.0-*	-	JSON tables that include all the meta data and annotations. Each split (trainval, test, mini) is provided in a separate folder.
   ```
 >Note: We use the **train_track** split to train our model and test it with the **val** split. Both splits are officially provided by NuScenes. During testing, we ignore the sequences where there is no point in the first given bbox.
+
+Waymo dataset
++ Download and prepare dataset by the instruction of [CenterPoint](https://github.com/tianweiy/CenterPoint/blob/master/docs/WAYMO.md).
+  ```
+  [Parent Folder]
+    tfrecord_training	                    
+    tfrecord_validation	                 
+    train 	                                    -	all training frames and annotations 
+    val   	                                    -	all validation frames and annotations 
+    infos_train_01sweeps_filter_zero_gt.pkl
+    infos_val_01sweeps_filter_zero_gt.pkl
+  ```
++ Prepare SOT dataset. Data from specific category and split will be merged (e.g., sot_infos_vehicle_train.pkl).
+```bash
+  python datasets/generate_waymo_sot.py
+```
+
 ### Quick Start
 #### Training
 To train a model, you must specify the `.yaml` file with `--cfg` argument. The `.yaml` file contains all the configurations of the dataset and the model. Currently, we provide four `.yaml` files under the [*cfgs*](./cfgs) directory. **Note:** Before running the code, you will need to edit the `.yaml` file by setting the `path` argument as the correct root of the dataset.
