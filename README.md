@@ -18,7 +18,7 @@ Pytorch-Lightning implementation of the Box-Aware Tracker.
 <img src="figures/results.gif" width="1000"/>
 
 ### Recent Updates
-+ Add support for Waymo
++ Add support for Waymo (⚠️ under testing)
 + Add support for NuScenes
 + ...
 ### Features
