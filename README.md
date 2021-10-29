@@ -18,6 +18,7 @@ Pytorch-Lightning implementation of the Box-Aware Tracker.
 <img src="figures/results.gif" width="1000"/>
 
 ### Recent Updates
++ Add `--preloading` option for traning (enabled by default in previous version). see [Training](#training)
 + Add support for Waymo (⚠️ under testing)
 + Add support for NuScenes
 + ...
@@ -95,13 +96,13 @@ Waymo dataset
 #### Training
 To train a model, you must specify the `.yaml` file with `--cfg` argument. The `.yaml` file contains all the configurations of the dataset and the model. Currently, we provide four `.yaml` files under the [*cfgs*](./cfgs) directory. **Note:** Before running the code, you will need to edit the `.yaml` file by setting the `path` argument as the correct root of the dataset.
 ```bash
-python main.py --gpu 0 1 --cfg cfgs/BAT_Car.yaml  --batch_size 50 --epoch 60
+python main.py --gpu 0 1 --cfg cfgs/BAT_Car.yaml  --batch_size 50 --epoch 60 --preloading
 ```
 After you start training, you can start Tensorboard to monitor the training process:
 ```
 tensorboard --logdir=./ --port=6006
 ```
-By default, the trainer runs a full evaluation on the full test split after training every epoch. You can set `--check_val_every_n_epoch` to a larger number to speed up the training.
+By default, the trainer runs a full evaluation on the full test split after training every epoch. You can set `--check_val_every_n_epoch` to a larger number to speed up the training. The `--preloading` flag is used to preload the training samples into the memory to save traning time. Remove this flag if you don't have enough memory.
 #### Testing
 To test a trained model, specify the checkpoint location with `--checkpoint` argument and send the `--test` flag to the command.
 ```bash
