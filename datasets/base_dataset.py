@@ -9,6 +9,8 @@ class BaseDataset:
         self.path = path
         self.split = split
         self.category_name = category_name
+        self.preloading = kwargs.get('preloading', False)
+
 
     def get_num_tracklets(self):
         raise NotImplementedError

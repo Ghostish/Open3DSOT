@@ -19,7 +19,7 @@ train_split: train
 val_split: test
 test_split: test
 preload_offset: 10
-tiny: True # for debug only
+tiny: False # for debug only
 
 #model configuration
 net_model: BAT
@@ -45,8 +45,8 @@ bc_weight: 1.0
 # testing config
 reference_BB: previous_result
 shape_aggregation: firstandprevious
-use_z: True
-limit_box: False
+use_z: False
+limit_box: True
 IoU_space: 3
 
 #training
@@ -56,6 +56,6 @@ epoch: 60
 from_epoch: 0
 lr: 0.001
 optimizer: Adam
-lr_decay_step: 12
-lr_decay_rate: 0.2
+lr_decay_step: 5
+lr_decay_rate: 0.1
 wd: 0

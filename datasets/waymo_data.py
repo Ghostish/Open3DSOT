@@ -37,20 +37,22 @@ class WaymoDataset(base_dataset.BaseDataset):
 
         self.tiny = kwargs.get('tiny', False)
         self.tracklet_anno_list, self.tracklet_len_list = self._build_tracklet_anno()
-        if  self.tiny:
+        if self.tiny:
             self.tracklet_anno_list = self.tracklet_anno_list[:100]
             self.tracklet_len_list = self.tracklet_len_list[:100]
 
         self.preload_offset = kwargs.get('preload_offset', 10)
-        self.training_samples = self._load_data()
-
+        if self.preloading:
+            self.training_samples = self._load_data()
 
     def _load_data(self):
         print('preloading data into memory')
         if self.tiny:
-            preload_data_path = os.path.join(self.Waymo_Folder, f"preload_{self.split}_{self.category_name}_{self.preload_offset}_tiny.dat")
+            preload_data_path = os.path.join(self.Waymo_Folder,
+                                             f"preload_{self.split}_{self.category_name}_{self.preload_offset}_tiny.dat")
         else:
-            preload_data_path = os.path.join(self.Waymo_Folder, f"preload_{self.split}_{self.category_name}_{self.preload_offset}.dat")
+            preload_data_path = os.path.join(self.Waymo_Folder,
+                                             f"preload_{self.split}_{self.category_name}_{self.preload_offset}.dat")
 
         print(preload_data_path)
 
@@ -85,7 +87,8 @@ class WaymoDataset(base_dataset.BaseDataset):
         return self.tracklet_len_list[tracklet_id]
 
     def _build_tracklet_anno(self):
-        preload_data_path = os.path.join(self.Waymo_Folder, f"sot_infos_{self.category_name.lower()}_{self.split.lower()}.pkl")
+        preload_data_path = os.path.join(self.Waymo_Folder,
+                                         f"sot_infos_{self.category_name.lower()}_{self.split.lower()}.pkl")
         if not os.path.exists(preload_data_path):
             print('Prepare %s' % preload_data_path)
             generate_waymo_data(self.Waymo_Folder, self.category_name, self.split)
@@ -104,10 +107,15 @@ class WaymoDataset(base_dataset.BaseDataset):
         return list_of_tracklet_anno, list_of_tracklet_len
 
     def get_frames(self, seq_id, frame_ids):
-        frames = [self.training_samples[seq_id][f_id] for f_id in frame_ids]
+        if self.preloading:
+            frames = [self.training_samples[seq_id][f_id] for f_id in frame_ids]
+        else:
+            seq_annos = self.tracklet_anno_list[seq_id]
+            frames = [self._get_frame_from_anno(seq_annos[f_id]) for f_id in frame_ids]
+
         return frames
 
-    def _get_frame_from_anno(self, anno,  track_id, check=False):
+    def _get_frame_from_anno(self, anno, track_id=None, check=False):
         '''
         'box': np.array([box.center_x, box.center_y, box.center_z,
                          box.length, box.width, box.height, ref_velocity[0],
@@ -119,7 +127,7 @@ class WaymoDataset(base_dataset.BaseDataset):
         with open(sample_data_lidar, 'rb') as f:
             pc_info = pickle.load(f)
 
-        pointcloud = pc_info['lidars']['points_xyz'].transpose((1,0))
+        pointcloud = pc_info['lidars']['points_xyz'].transpose((1, 0))
 
         with open(sample_data_lidar.replace('lidar', 'annos'), 'rb') as f:
             ref_obj = pickle.load(f)
@@ -137,7 +145,8 @@ class WaymoDataset(base_dataset.BaseDataset):
         gt_boxes[[3, 4]] = gt_boxes[[4, 3]]
 
         pc = PointCloud(pointcloud)
-        bb = Box(gt_boxes[0:3], gt_boxes[3:6], Quaternion(axis=[0,0,1], radians=-gt_boxes[-1]), velocity=gt_boxes[6:9], name=anno['Class'])
+        bb = Box(gt_boxes[0:3], gt_boxes[3:6], Quaternion(axis=[0, 0, 1], radians=-gt_boxes[-1]),
+                 velocity=gt_boxes[6:9], name=anno['Class'])
         bb.rotate(Quaternion(matrix=global_from_car))
         bb.translate(global_from_car[:3, -1])
         if self.preload_offset > 0:
@@ -156,7 +165,6 @@ class WaymoDataset(base_dataset.BaseDataset):
             # exit()
 
         return {"pc": pc, "3d_bbox": bb, 'meta': anno}
-
 
     @staticmethod
     def veh_pos_to_transform(veh_pos):
@@ -196,8 +204,6 @@ class WaymoDataset(base_dataset.BaseDataset):
         )
 
         return global_from_car, car_from_global
-
-
 
 
 if __name__ == '__main__':

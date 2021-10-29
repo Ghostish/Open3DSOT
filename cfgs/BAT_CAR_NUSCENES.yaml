@@ -1,6 +1,6 @@
 #data
 dataset: nuscenes
-path: /data/amax/dataset/nuscenes
+path:
 version: v1.0-trainval
 category_name: Car
 search_bb_scale: 1.25
@@ -16,7 +16,7 @@ box_aware: True
 num_candidates: 4
 up_axis: [ 0,0,1 ]
 preload_offset: 10
-key_frame_only: False
+key_frame_only: True
 train_split: train_track
 val_split: val
 test_split: val

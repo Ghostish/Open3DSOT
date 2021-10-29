@@ -29,7 +29,8 @@ class kittiDataset(base_dataset.BaseDataset):
         self.tracklet_anno_list, self.tracklet_len_list = self._build_tracklet_anno()
         self.coordinate_mode = kwargs.get('coordinate_mode', 'velodyne')
         self.preload_offset = kwargs.get('preload_offset', -1)
-        self.training_samples = self._load_data()
+        if self.preloading:
+            self.training_samples = self._load_data()
 
     @staticmethod
     def _build_scene_list(split):
@@ -127,7 +128,12 @@ class kittiDataset(base_dataset.BaseDataset):
         return list_of_tracklet_anno, list_of_tracklet_len
 
     def get_frames(self, seq_id, frame_ids):
-        frames = [self.training_samples[seq_id][f_id] for f_id in frame_ids]
+        if self.preloading:
+            frames = [self.training_samples[seq_id][f_id] for f_id in frame_ids]
+        else:
+            seq_annos = self.tracklet_anno_list[seq_id]
+            frames = [self._get_frame_from_anno(seq_annos[f_id]) for f_id in frame_ids]
+
         return frames
 
     def _get_frame_from_anno(self, anno):

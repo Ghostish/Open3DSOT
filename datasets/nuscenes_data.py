@@ -64,7 +64,8 @@ class NuScenesDataset(base_dataset.BaseDataset):
         self.preload_offset = kwargs.get('preload_offset', -1)
         self.track_instances = self.filter_instance(split, category_name.lower(), self.min_points)
         self.tracklet_anno_list, self.tracklet_len_list = self._build_tracklet_anno()
-        self.training_samples = self._load_data()
+        if self.preloading:
+            self.training_samples = self._load_data()
 
     def filter_instance(self, split, category_name=None, min_points=-1):
         """
@@ -141,10 +142,14 @@ class NuScenesDataset(base_dataset.BaseDataset):
         return self.tracklet_len_list[tracklet_id]
 
     def get_frames(self, seq_id, frame_ids):
-
-        frames = [self.training_samples[seq_id][f_id] for f_id in frame_ids]
+        if self.preloading:
+            frames = [self.training_samples[seq_id][f_id] for f_id in frame_ids]
+        else:
+            seq_annos = self.tracklet_anno_list[seq_id]
+            frames = [self._get_frame_from_anno_data(seq_annos[f_id]) for f_id in frame_ids]
 
         return frames
+
 
     def _get_frame_from_anno_data(self, anno):
         sample_data_lidar = anno['sample_data_lidar']
