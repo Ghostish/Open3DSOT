@@ -42,6 +42,7 @@ def parse_config():
     parser.add_argument('--save_top_k', type=int, default=-1,
                         help='save top k checkpoints, use -1 to checkpoint every epoch')
     parser.add_argument('--check_val_every_n_epoch', type=int, default=1, help='check_val_every_n_epoch')
+    parser.add_argument('--preloading', action='store_true', default=False, help='preload dataset into memory')
 
     args = parser.parse_args()
     config = load_yaml(args.cfg)
@@ -61,8 +62,9 @@ if not cfg.test:
     # dataset and dataloader
     train_data = get_dataset(cfg, type='train', split=cfg.train_split)
     val_data = get_dataset(cfg, type='test', split=cfg.val_split)
-    train_loader = DataLoader(train_data, batch_size=cfg.batch_size, num_workers=cfg.workers, shuffle=True)
-    val_loader = DataLoader(val_data, batch_size=1, num_workers=cfg.workers, collate_fn=lambda x: x)
+    train_loader = DataLoader(train_data, batch_size=cfg.batch_size, num_workers=cfg.workers, shuffle=True,
+                              pin_memory=True)
+    val_loader = DataLoader(val_data, batch_size=1, num_workers=cfg.workers, collate_fn=lambda x: x, pin_memory=True)
     checkpoint_callback = ModelCheckpoint(monitor='precision/test', mode='max', save_last=True,
                                           save_top_k=cfg.save_top_k)
 
@@ -73,7 +75,7 @@ if not cfg.test:
     trainer.fit(net, train_loader, val_loader)
 else:
     test_data = get_dataset(cfg, type='test', split=cfg.test_split)
-    test_loader = DataLoader(test_data, batch_size=1, num_workers=cfg.workers, collate_fn=lambda x: x)
+    test_loader = DataLoader(test_data, batch_size=1, num_workers=cfg.workers, collate_fn=lambda x: x, pin_memory=True)
 
     trainer = pl.Trainer(gpus=cfg.gpu, accelerator='ddp')
     trainer.validate(net, test_loader)
