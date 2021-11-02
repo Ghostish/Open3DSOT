@@ -1,7 +1,7 @@
 # Box-Aware Tracker (BAT)
 Pytorch-Lightning implementation of the Box-Aware Tracker.  
 
-[Box-Aware Feature Enhancement for Single Object Tracking on Point Clouds](https://openaccess.thecvf.com/content/ICCV2021/papers/Zheng_Box-Aware_Feature_Enhancement_for_Single_Object_Tracking_on_Point_Clouds_ICCV_2021_paper.pdf). **ICCV 2021** 
+[Box-Aware Feature Enhancement for Single Object Tracking on Point Clouds](https://arxiv.org/abs/2108.04728). **ICCV 2021** 
 
 [Chaoda Zheng](https://github.com/Ghostish/), [Xu Yan](https://yanx27.github.io/), Jiantao Gao, Weibing Zhao, Wei Zhang, [Zhen Li*](https://mypage.cuhk.edu.cn/academics/lizhen/), Shuguang Cui
 
@@ -18,6 +18,7 @@ Pytorch-Lightning implementation of the Box-Aware Tracker.
 <img src="figures/results.gif" width="1000"/>
 
 ### Recent Updates
++ Update experiment results in the main paper, see [arxiv link](https://arxiv.org/abs/2108.04728). 
 + Add `--preloading` option for traning (enabled by default in previous version). see [Training](#training)
 + Add support for Waymo (⚠️ under testing)
 + Add support for NuScenes
