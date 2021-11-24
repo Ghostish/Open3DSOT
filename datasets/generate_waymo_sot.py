@@ -19,6 +19,8 @@ def lood_pickle(root):
 
 
 def generate_waymo_data(root, cla, split):
+    TYPE_LIST = ['UNKNOWN', 'VEHICLE', 'PEDESTRIAN', 'SIGN', 'CYCLIST']
+
     print('Generate %s class for %s set' % (cla, split))
     waymo_infos_all = lood_pickle(os.path.join(root, 'infos_%s_01sweeps_filter_zero_gt.pkl' % split))
 
@@ -26,14 +28,14 @@ def generate_waymo_data(root, cla, split):
 
     for idx, frame in tqdm(enumerate(waymo_infos_all), total=len(waymo_infos_all)):
         anno = lood_pickle(os.path.join(root, frame['anno_path']))
-        for i in range(len(frame['gt_names'])):  # i-th object
-            obj = anno['objects'][i]
-            if frame['gt_names'][i] == cla:
+        
+        for obj in anno['objects']:
+            if TYPE_LIST[obj['label']] == cla:
                 if not obj['name'] in DATA:
                     DATA[obj['name']] = [
                         {
                             'PC': frame['path'],
-                            'Box': frame['gt_boxes'][i],
+                            'Box': obj['box'],
                             'Class': cla
                         }
                     ]
@@ -41,7 +43,7 @@ def generate_waymo_data(root, cla, split):
                     DATA[obj['name']] += [
                         {
                             'PC': frame['path'],
-                            'Box': frame['gt_boxes'][i],
+                            'Box': obj['box'],
                             'Class': cla
                         }
                     ]
