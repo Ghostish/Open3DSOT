@@ -20,7 +20,7 @@ Pytorch-Lightning implementation of the Box-Aware Tracker.
 ### Recent Updates
 + Update experiment results in the main paper, see [arxiv link](https://arxiv.org/abs/2108.04728)
 + Add `--preloading` option for traning (enabled by default in previous version). see [Training](#training)
-+ Add support for Waymo (⚠️ under testing)
++ Add support for Waymo
 + Add support for NuScenes
 + ...
 ### Features
