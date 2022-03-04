@@ -1,33 +1,51 @@
-# Box-Aware Tracker (BAT)
-Pytorch-Lightning implementation of the Box-Aware Tracker.  
+# Open3DSOT
+A general python framework for single object tracking in LiDAR point clouds, based on PyTorch Lightning.
 
-[Box-Aware Feature Enhancement for Single Object Tracking on Point Clouds](https://arxiv.org/abs/2108.04728). **ICCV 2021** 
+The official code release of **[[BAT]](https://arxiv.org/abs/2108.04728)** and **[[MM Track]](http://arxiv.org/abs/2203.01730)**.
 
-[Chaoda Zheng](https://github.com/Ghostish/), [Xu Yan](https://yanx27.github.io/), Jiantao Gao, Weibing Zhao, Wei Zhang, [Zhen Li*](https://mypage.cuhk.edu.cn/academics/lizhen/), Shuguang Cui
 
-### Citation
-```bibtex
-@inproceedings{zheng2021box,
-  title={Box-Aware Feature Enhancement for Single Object Tracking on Point Clouds},
-  author={Zheng, Chaoda and Yan, Xu and Gao, Jiantao and Zhao, Weibing and Zhang, Wei and Li, Zhen and Cui, Shuguang},
-  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
-  pages={13199--13208},
-  year={2021}
-}
-```
-<img src="figures/results.gif" width="1000"/>
-
-### Recent Updates
-+ Update experiment results in the main paper, see [arxiv link](https://arxiv.org/abs/2108.04728)
-+ Add `--preloading` option for traning (enabled by default in previous version). see [Training](#training)
-+ Add support for Waymo
-+ Add support for NuScenes
-+ ...
 ### Features
 + Modular design. It is easy to config the model and training/testing behaviors through just a `.yaml` file.
 + DDP support for both training and testing.
-+ Provide a 3rd party implementation of [P2B](https://github.com/HaozheQi/P2B).
-### Setup
++ Support all common tracking datasets (KITTI, NuScenes, Waymo Open Dataset).
+## Trackers
+This repository includes the implementation of the following models:
+
+### MM-Track (CVPR2022)
+**[[Paper]](http://arxiv.org/abs/2203.01730)**
+
+**MM-Track** is the first motion-centric tracker in LiDAR SOT, which robustly handles distractors and drastic appearance changes in the scenes.  Unlike previous methods, MM-Track is a **matching-free** two-stage tracker which localizes the targets by explicitly modeling the "relative target motion" among frames.
+
+<p align="center">
+<img src="figures/mmtrack.png" width="800"/>
+</p>
+
+<p align="center">
+<img src="figures/results_mmtrack.gif" width="800"/>
+</p>
+
+### BAT (ICCV2021)
+**[[Paper]](https://arxiv.org/abs/2108.04728) [[Results]](./README.md#Reproduction)**
+
+Official implementation of **BAT**. BAT uses the BBox information to compensate the information loss of incomplete scans. It augments the target template with box-aware features that efficiently and effectively improve appearance matching.
+
+<p align="center">
+<img src="figures/bat.png" width="800"/>
+</p>
+<p align="center">
+<img src="figures/results.gif" width="800"/>
+</p>
+
+### P2B (CVPR2020)
+**[[Paper]](https://arxiv.org/abs/2005.13888) [[Official implementation]](https://github.com/HaozheQi/P2B)**
+
+Third party implementation of **P2B**. Our implementation achieves better results than the official code release. P2B adapts SiamRPN to 3D point clouds by integrating a pointwise correlation operator with a point-based RPN (VoteNet).
+
+<p align="center">
+<img src="figures/p2b.png" width="800"/>
+</p>
+
+## Setup
 Installation
 + Create the environment
   ```
@@ -93,8 +111,8 @@ Waymo dataset
   python datasets/generate_waymo_sot.py
 ```
 
-### Quick Start
-#### Training
+## Quick Start
+### Training
 To train a model, you must specify the `.yaml` file with `--cfg` argument. The `.yaml` file contains all the configurations of the dataset and the model. Currently, we provide four `.yaml` files under the [*cfgs*](./cfgs) directory. **Note:** Before running the code, you will need to edit the `.yaml` file by setting the `path` argument as the correct root of the dataset.
 ```bash
 python main.py --gpu 0 1 --cfg cfgs/BAT_Car.yaml  --batch_size 50 --epoch 60 --preloading
@@ -104,14 +122,13 @@ After you start training, you can start Tensorboard to monitor the training proc
 tensorboard --logdir=./ --port=6006
 ```
 By default, the trainer runs a full evaluation on the full test split after training every epoch. You can set `--check_val_every_n_epoch` to a larger number to speed up the training. The `--preloading` flag is used to preload the training samples into the memory to save traning time. Remove this flag if you don't have enough memory.
-#### Testing
+### Testing
 To test a trained model, specify the checkpoint location with `--checkpoint` argument and send the `--test` flag to the command.
 ```bash
 python main.py --gpu 0 1 --cfg cfgs/BAT_Car.yaml  --checkpoint /path/to/checkpoint/xxx.ckpt --test
 ```
 
-### Reproduction
-This codebase produces better results than those we report in our original paper.
+## Reproduction
 | Model | Category | Success| Precision| Checkpoint
 |--|--|--|--|--|
 | BAT-KITTI | Car	|65.37 | 78.88|pretrained_models/bat_kitti_car.ckpt
@@ -123,16 +140,10 @@ Three trained BAT models for KITTI and NuScenes datasets are provided in the  [*
 python main.py --gpu 0 1 --cfg cfgs/BAT_Car.yaml  --checkpoint ./pretrained_models/bat_kitti_car.ckpt --test
 ```
 
-### To-dos
-- [x] DDP support
-- [x] Multi-gpus testing
-- [x] Add NuScenes dataset
-- [ ] Add codes for visualization
-- [ ] Add support for more methods
 
-### Acknowledgment
+## Acknowledgment
 + This repo is built upon [P2B](https://github.com/HaozheQi/P2B) and [SC3D](https://github.com/SilvioGiancola/ShapeCompletion3DTracking).
 + Thank Erik Wijmans for his pytorch implementation of [PointNet++](https://github.com/erikwijmans/Pointnet2_PyTorch)
 
-### License
+## License
 This repository is released under MIT License (see LICENSE file for details).

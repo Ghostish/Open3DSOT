@@ -1,0 +1,56 @@
+#data
+dataset: nuscenes
+path: /data/amax/dataset/nuscenes
+version: v1.0-trainval
+category_name: Car # [Car, Van, Pedestrian, Cyclist, All]
+search_bb_scale: 1.25
+search_bb_offset: 2
+model_bb_scale: 1.25
+model_bb_offset: 0
+template_size: 512
+search_size: 1024
+random_sample: False
+sample_per_epoch: -1
+degrees: True # use degrees or radians
+num_candidates: 4
+up_axis: [ 0,0,1 ]
+preload_offset: 10
+key_frame_only: True
+train_split: train_track
+val_split: val
+test_split: val
+min_points: 1
+
+#model configuration
+net_model: P2B
+use_fps: False
+normalize_xyz: False
+feature_channel: 256 #the output channel of backbone
+hidden_channel: 256 #the hidden channel of xcorr
+out_channel: 256 #the output channel of xcorr
+vote_channel: 256 #the channel for vote aggregation
+num_proposal: 64
+
+#loss configuration
+objectiveness_weight: 1.5
+box_weight: 0.2
+vote_weight: 1.0
+seg_weight: 0.2
+
+# testing config
+reference_BB: previous_result
+shape_aggregation: firstandprevious
+use_z: False
+limit_box: True
+IoU_space: 3
+
+#training
+batch_size: 50
+workers: 10
+epoch: 60
+from_epoch: 0
+lr: 0.001
+optimizer: Adam
+lr_decay_step: 20
+lr_decay_rate: 0.1
+wd: 0
