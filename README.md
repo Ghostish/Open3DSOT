@@ -53,10 +53,10 @@ Third party implementation of **P2B**. Our implementation achieves better result
 Installation
 + Create the environment
   ```
-  git clone https://github.com/Ghostish/BAT.git
-  cd BAT
-  conda create -n bat  python=3.6
-  conda activate bat
+  git clone https://github.com/Ghostish/Open3DSOT.git
+  cd Open3DSOT
+  conda create -n Open3DSOT  python=3.6
+  conda activate Open3DSOT
   ```
 + Install pytorch
   ```
