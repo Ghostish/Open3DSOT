@@ -8,6 +8,10 @@ The official code release of **[[BAT]](https://arxiv.org/abs/2108.04728)** and *
 + Modular design. It is easy to config the model and training/testing behaviors through just a `.yaml` file.
 + DDP support for both training and testing.
 + Support all common tracking datasets (KITTI, NuScenes, Waymo Open Dataset).
+
+### :mega:  One tracking paper is accepted by CVPR2022! :point_down:
++ [Beyond 3D Siamese Tracking: A Motion-Centric Paradigm for 3D Single Object Tracking in Point Clouds](https://arxiv.org/abs/2005.13888) | Code coming here soon...
+
 ## Trackers
 This repository includes the implementation of the following models:
 
