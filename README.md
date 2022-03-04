@@ -1,7 +1,7 @@
 # Open3DSOT
 A general python framework for single object tracking in LiDAR point clouds, based on PyTorch Lightning.
 
-The official code release of **[[BAT]](https://arxiv.org/abs/2108.04728)** and **[[MM Track]](http://arxiv.org/abs/2203.01730)**.
+The official code release of **[BAT](https://arxiv.org/abs/2108.04728)** and **[MM Track](http://arxiv.org/abs/2203.01730)**.
 
 
 ### Features
@@ -18,7 +18,7 @@ This repository includes the implementation of the following models:
 ### MM-Track (CVPR2022)
 **[[Paper]](http://arxiv.org/abs/2203.01730)**
 
-**MM-Track** is the first motion-centric tracker in LiDAR SOT, which robustly handles distractors and drastic appearance changes in the scenes.  Unlike previous methods, MM-Track is a **matching-free** two-stage tracker which localizes the targets by explicitly modeling the "relative target motion" among frames.
+**MM-Track** is the first **motion-centric tracker** in LiDAR SOT, which robustly handles distractors and drastic appearance changes in complex driving scenes.  Unlike previous methods, MM-Track is a **matching-free** two-stage tracker which localizes the targets by explicitly modeling the "relative target motion" among frames.
 
 <p align="center">
 <img src="figures/mmtrack.png" width="800"/>
