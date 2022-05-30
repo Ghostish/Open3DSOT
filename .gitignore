@@ -1,3 +1,6 @@
 .DS_Store
 .idea/
 */.DS_Store
+*.pyc
+events.*
+lightning_logs
