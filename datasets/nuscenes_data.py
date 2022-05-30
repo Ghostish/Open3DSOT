@@ -5,11 +5,15 @@ Created by zenn at 2021/9/1 15:05
 import os
 
 import numpy as np
-import nuscenes
 import pickle
-from nuscenes.nuscenes import NuScenes
-from nuscenes.utils.data_classes import LidarPointCloud, Box
-from nuscenes.utils.splits import create_splits_scenes
+try:
+    import nuscenes
+    from nuscenes.nuscenes import NuScenes
+    from nuscenes.utils.data_classes import LidarPointCloud, Box
+    from nuscenes.utils.splits import create_splits_scenes
+except ModuleNotFoundError:
+    print("Nuscenes utils are not installed")
+
 from pyquaternion import Quaternion
 
 from datasets import points_utils, base_dataset
