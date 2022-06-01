@@ -55,7 +55,7 @@ Installation
   ```
   git clone https://github.com/Ghostish/Open3DSOT.git
   cd Open3DSOT
-  conda create -n Open3DSOT  python=3.6
+  conda create -n Open3DSOT  python=3.8
   conda activate Open3DSOT
   ```
 + Install pytorch
