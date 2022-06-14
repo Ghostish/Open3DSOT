@@ -206,6 +206,3 @@ class WaymoDataset(base_dataset.BaseDataset):
         return global_from_car, car_from_global
 
 
-if __name__ == '__main__':
-    WaymoDataset('/raid/databases/Waymo/', 'train', tiny=True)
-    # WaymoDataset('/raid/databases/Waymo/', 'val')

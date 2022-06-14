@@ -1,6 +1,6 @@
 #data
 dataset: nuscenes
-path: /data/amax/dataset/nuscenes
+path: #put data root here
 version: v1.0-trainval
 category_name: Car # [Car, Van, Pedestrian, Cyclist, All]
 search_bb_scale: 1.25
@@ -20,6 +20,8 @@ train_split: train_track
 val_split: val
 test_split: val
 min_points: 1
+train_type: train_siamese
+data_limit_box: True
 
 #model configuration
 net_model: P2B
@@ -54,3 +56,4 @@ optimizer: Adam
 lr_decay_step: 20
 lr_decay_rate: 0.1
 wd: 0
+gradient_clip_val: 0.0

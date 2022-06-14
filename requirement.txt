@@ -13,3 +13,4 @@ tdqm==0.0.1
 tensorboard==2.4.1
 torchmetrics==0.4.1
 tqdm==4.61.1
+nuscenes-devkit==1.1.9

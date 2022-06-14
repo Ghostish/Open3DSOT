@@ -1,6 +1,6 @@
 #data
 dataset: waymo
-path:  /raid/databases/Waymo/ #put the root of the dataset here
+path:  #put the root of the dataset here
 category_name: Vehicle # [Vehicle, Pedestrian, Cyclist]
 search_bb_scale: 1.25
 search_bb_offset: 2
@@ -20,6 +20,8 @@ val_split: test
 test_split: test
 preload_offset: 10
 tiny: False # for debug only
+train_type: train_siamese
+data_limit_box: True
 
 #model configuration
 net_model: P2B
@@ -59,3 +61,4 @@ optimizer: Adam
 lr_decay_step: 5
 lr_decay_rate: 0.1
 wd: 0
+gradient_clip_val: 0.0

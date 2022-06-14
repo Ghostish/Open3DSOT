@@ -11,6 +11,7 @@ from utils.metrics import TorchSuccess, TorchPrecision
 from utils.metrics import estimateOverlap, estimateAccuracy
 import torch.nn.functional as F
 import numpy as np
+from nuscenes.utils import geometry_utils
 
 
 class BaseModel(pl.LightningModule):
@@ -33,6 +34,90 @@ class BaseModel(pl.LightningModule):
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=self.config.lr_decay_step,
                                                     gamma=self.config.lr_decay_rate)
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
+
+    def compute_loss(self, data, output):
+        raise NotImplementedError
+
+    def build_input_dict(self, sequence, frame_id, results_bbs, **kwargs):
+        raise NotImplementedError
+
+    def evaluate_one_sample(self, data_dict, ref_box):
+        end_points = self(data_dict)
+
+        estimation_box = end_points['estimation_boxes']
+        estimation_box_cpu = estimation_box.squeeze(0).detach().cpu().numpy()
+
+        if len(estimation_box.shape) == 3:
+            best_box_idx = estimation_box_cpu[:, 4].argmax()
+            estimation_box_cpu = estimation_box_cpu[best_box_idx, 0:4]
+
+        candidate_box = points_utils.getOffsetBB(ref_box, estimation_box_cpu, degrees=self.config.degrees,
+                                                 use_z=self.config.use_z,
+                                                 limit_box=self.config.limit_box)
+        return candidate_box
+
+    def evaluate_one_sequence(self, sequence):
+        """
+        :param sequence: a sequence of annos {"pc": pc, "3d_bbox": bb, 'meta': anno}
+        :return:
+        """
+        ious = []
+        distances = []
+        results_bbs = []
+        for frame_id in range(len(sequence)):  # tracklet
+            this_bb = sequence[frame_id]["3d_bbox"]
+            if frame_id == 0:
+                # the first frame
+                results_bbs.append(this_bb)
+            else:
+
+                # construct input dict
+                data_dict, ref_bb = self.build_input_dict(sequence, frame_id, results_bbs)
+                # run the tracker
+                candidate_box = self.evaluate_one_sample(data_dict, ref_box=ref_bb)
+                results_bbs.append(candidate_box)
+
+            this_overlap = estimateOverlap(this_bb, results_bbs[-1], dim=self.config.IoU_space,
+                                           up_axis=self.config.up_axis)
+            this_accuracy = estimateAccuracy(this_bb, results_bbs[-1], dim=self.config.IoU_space,
+                                             up_axis=self.config.up_axis)
+            ious.append(this_overlap)
+            distances.append(this_accuracy)
+        return ious, distances, results_bbs
+
+    def validation_step(self, batch, batch_idx):
+        sequence = batch[0]  # unwrap the batch with batch size = 1
+        ious, distances, *_ = self.evaluate_one_sequence(sequence)
+        # update metrics
+        self.success(torch.tensor(ious, device=self.device))
+        self.prec(torch.tensor(distances, device=self.device))
+        self.log('success/test', self.success, on_step=True, on_epoch=True)
+        self.log('precision/test', self.prec, on_step=True, on_epoch=True)
+
+    def validation_epoch_end(self, outputs):
+        self.logger.experiment.add_scalars('metrics/test',
+                                           {'success': self.success.compute(),
+                                            'precision': self.prec.compute()},
+                                           global_step=self.global_step)
+
+    def test_step(self, batch, batch_idx):
+        sequence = batch[0]  # unwrap the batch with batch size = 1
+        ious, distances, result_bbs = self.evaluate_one_sequence(sequence)
+        # update metrics
+        self.success(torch.tensor(ious, device=self.device))
+        self.prec(torch.tensor(distances, device=self.device))
+        self.log('success/test', self.success, on_step=True, on_epoch=True)
+        self.log('precision/test', self.prec, on_step=True, on_epoch=True)
+        return result_bbs
+
+    def test_epoch_end(self, outputs):
+        self.logger.experiment.add_scalars('metrics/test',
+                                           {'success': self.success.compute(),
+                                            'precision': self.prec.compute()},
+                                           global_step=self.global_step)
+
+
+class MatchingBaseModel(BaseModel):
 
     def compute_loss(self, data, output):
         """
@@ -152,58 +237,67 @@ class BaseModel(pl.LightningModule):
         }
         return data_dict
 
-    def evaluate_one_sequence(self, sequence):
-        """
+    def build_input_dict(self, sequence, frame_id, results_bbs, **kwargs):
+        # preparing search area
+        search_pc_crop, ref_bb = self.generate_search_area(sequence, frame_id, results_bbs)
+        # update template
+        template_pc, canonical_box = self.generate_template(sequence, frame_id, results_bbs)
+        # construct input dict
+        data_dict = self.prepare_input(template_pc, search_pc_crop, canonical_box)
+        return data_dict, ref_bb
 
-        :param sequence: a sequence of annos {"pc": pc, "3d_bbox": bb, 'meta': anno}
-        :return:
-        """
-        ious = []
-        distances = []
-        results_bbs = []
-        for frame_id in range(len(sequence)):  # tracklet
-            this_bb = sequence[frame_id]["3d_bbox"]
-            if frame_id == 0:
-                # the first frame
-                results_bbs.append(this_bb)
-            else:
 
-                # preparing search area
-                search_pc_crop, ref_bb = self.generate_search_area(sequence, frame_id, results_bbs)
-                # update template
-                template_pc, canonical_box = self.generate_template(sequence, frame_id, results_bbs)
-                # construct input dict
-                data_dict = self.prepare_input(template_pc, search_pc_crop, canonical_box)
+class MotionBaseModel(BaseModel):
+    def __init__(self, config, **kwargs):
+        super().__init__(config, **kwargs)
+        self.save_hyperparameters()
 
-                end_points = self(data_dict)
-                estimation_box = end_points['estimation_boxes']
-                estimation_boxes_cpu = estimation_box.squeeze(0).detach().cpu().numpy()
-                best_box_idx = estimation_boxes_cpu[:, 4].argmax()
-                estimation_box_cpu = estimation_boxes_cpu[best_box_idx, 0:4]
-                candidate_box = points_utils.getOffsetBB(ref_bb, estimation_box_cpu, degrees=self.config.degrees,
-                                                         use_z=self.config.use_z,
-                                                         limit_box=self.config.limit_box)
-                results_bbs.append(candidate_box)
+    def build_input_dict(self, sequence, frame_id, results_bbs):
+        assert frame_id > 0, "no need to construct an input_dict at frame 0"
 
-            this_overlap = estimateOverlap(this_bb, results_bbs[-1], dim=self.config.IoU_space,
-                                           up_axis=self.config.up_axis)
-            this_accuracy = estimateAccuracy(this_bb, results_bbs[-1], dim=self.config.IoU_space,
-                                             up_axis=self.config.up_axis)
-            ious.append(this_overlap)
-            distances.append(this_accuracy)
-        return ious, distances
+        prev_frame = sequence[frame_id - 1]
+        this_frame = sequence[frame_id]
+        prev_pc = prev_frame['pc']
+        this_pc = this_frame['pc']
+        ref_box = results_bbs[-1]
+        prev_frame_pc = points_utils.generate_subwindow(prev_pc, ref_box,
+                                                        scale=self.config.bb_scale,
+                                                        offset=self.config.bb_offset)
+        this_frame_pc = points_utils.generate_subwindow(this_pc, ref_box,
+                                                        scale=self.config.bb_scale,
+                                                        offset=self.config.bb_offset)
 
-    def validation_step(self, batch, batch_idx):
-        sequence = batch[0]  # unwrap the batch with batch size = 1
-        ious, distances = self.evaluate_one_sequence(sequence)
-        # update metrics
-        self.success(torch.tensor(ious, device=self.device))
-        self.prec(torch.tensor(distances, device=self.device))
-        self.log('success/test', self.success, on_step=True, on_epoch=True)
-        self.log('precision/test', self.prec, on_step=True, on_epoch=True)
+        canonical_box = points_utils.transform_box(ref_box, ref_box)
+        prev_points, idx_prev = points_utils.regularize_pc(prev_frame_pc.points.T,
+                                                           self.config.point_sample_size,
+                                                           seed=1)
 
-    def validation_epoch_end(self, outputs):
-        self.logger.experiment.add_scalars('metrics/test',
-                                           {'success': self.success.compute(),
-                                            'precision': self.prec.compute()},
-                                           global_step=self.global_step)
+        this_points, idx_this = points_utils.regularize_pc(this_frame_pc.points.T,
+                                                           self.config.point_sample_size,
+                                                           seed=1)
+        seg_mask_prev = geometry_utils.points_in_box(canonical_box, prev_points.T, 1.25).astype(float)
+
+        # Here we use 0.2/0.8 instead of 0/1 to indicate that the previous box is not GT.
+        # When boxcloud is used, the actual value of prior-targetness mask doesn't really matter.
+        if frame_id != 1:
+            seg_mask_prev[seg_mask_prev == 0] = 0.2
+            seg_mask_prev[seg_mask_prev == 1] = 0.8
+        seg_mask_this = np.full(seg_mask_prev.shape, fill_value=0.5)
+
+        timestamp_prev = np.full((self.config.point_sample_size, 1), fill_value=0)
+        timestamp_this = np.full((self.config.point_sample_size, 1), fill_value=0.1)
+        prev_points = np.concatenate([prev_points, timestamp_prev, seg_mask_prev[:, None]], axis=-1)
+        this_points = np.concatenate([this_points, timestamp_this, seg_mask_this[:, None]], axis=-1)
+
+        stack_points = np.concatenate([prev_points, this_points], axis=0)
+
+        data_dict = {"points": torch.tensor(stack_points[None, :], device=self.device, dtype=torch.float32),
+                     }
+        if getattr(self.config, 'box_aware', False):
+            candidate_bc_prev = points_utils.get_point_to_box_distance(
+                stack_points[:self.config.point_sample_size, :3], canonical_box)
+            candidate_bc_this = np.zeros_like(candidate_bc_prev)
+            candidate_bc = np.concatenate([candidate_bc_prev, candidate_bc_this], axis=0)
+            data_dict.update({'candidate_bc': points_utils.np_to_torch_tensor(candidate_bc.astype('float32'),
+                                                                              device=self.device)})
+        return data_dict, results_bbs[-1]

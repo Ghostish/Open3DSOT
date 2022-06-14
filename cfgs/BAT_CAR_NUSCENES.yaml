@@ -1,6 +1,6 @@
 #data
 dataset: nuscenes
-path:
+path: #put data root here
 version: v1.0-trainval
 category_name: Car
 search_bb_scale: 1.25
@@ -21,6 +21,8 @@ train_split: train_track
 val_split: val
 test_split: val
 min_points: 1
+train_type: train_siamese
+data_limit_box: False
 
 #model configuration
 net_model: BAT
@@ -60,3 +62,4 @@ optimizer: Adam
 lr_decay_step: 20
 lr_decay_rate: 0.1
 wd: 0
+gradient_clip_val: 0.0

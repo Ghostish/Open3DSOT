@@ -49,25 +49,27 @@ def fromBoxToPoly(box, up_axis=(0, -1, 0)):
 def estimateOverlap(box_a, box_b, dim=2, up_axis=(0, -1, 0)):
     # if box_a == box_b:
     #     return 1.0
+    try:
+        Poly_anno = fromBoxToPoly(box_a, up_axis)
+        Poly_subm = fromBoxToPoly(box_b, up_axis)
 
-    Poly_anno = fromBoxToPoly(box_a, up_axis)
-    Poly_subm = fromBoxToPoly(box_b, up_axis)
+        box_inter = Poly_anno.intersection(Poly_subm)
+        box_union = Poly_anno.union(Poly_subm)
+        if dim == 2:
+            return box_inter.area / box_union.area
 
-    box_inter = Poly_anno.intersection(Poly_subm)
-    box_union = Poly_anno.union(Poly_subm)
-    if dim == 2:
-        return box_inter.area / box_union.area
+        else:
+            up_axis = np.array(up_axis)
+            up_max = min(box_a.center[up_axis != 0], box_b.center[up_axis != 0])
+            up_min = max(box_a.center[up_axis != 0] - box_a.wlh[2], box_b.center[up_axis != 0] - box_b.wlh[2])
+            inter_vol = box_inter.area * max(0, up_max[0] - up_min[0])
+            anno_vol = box_a.wlh[0] * box_a.wlh[1] * box_a.wlh[2]
+            subm_vol = box_b.wlh[0] * box_b.wlh[1] * box_b.wlh[2]
 
-    else:
-        up_axis = np.array(up_axis)
-        up_max = min(box_a.center[up_axis != 0], box_b.center[up_axis != 0])
-        up_min = max(box_a.center[up_axis != 0] - box_a.wlh[2], box_b.center[up_axis != 0] - box_b.wlh[2])
-        inter_vol = box_inter.area * max(0, up_max[0] - up_min[0])
-        anno_vol = box_a.wlh[0] * box_a.wlh[1] * box_a.wlh[2]
-        subm_vol = box_b.wlh[0] * box_b.wlh[1] * box_b.wlh[2]
-
-        overlap = inter_vol * 1.0 / (anno_vol + subm_vol - inter_vol)
-        return overlap
+            overlap = inter_vol * 1.0 / (anno_vol + subm_vol - inter_vol)
+            return overlap
+    except ValueError:
+        return 0.0
 
 
 class TorchPrecision(Metric):
@@ -93,7 +95,7 @@ class TorchPrecision(Metric):
         accs = torchmetrics.utilities.data.dim_zero_cat(self.accuracies)
         if accs.numel() == 0:
             return 0
-        return torch.trapz(self.value(accs), x=self.Xaxis * 100 / self.max_accuracy)
+        return torch.trapz(self.value(accs), x=self.Xaxis) * 100 / self.max_accuracy
 
 
 class TorchSuccess(Metric):
@@ -117,7 +119,7 @@ class TorchSuccess(Metric):
 
         if overlaps.numel() == 0:
             return 0
-        return torch.tensor(np.trapz(self.value(overlaps), x=self.Xaxis) * 100 / self.max_overlap)
+        return torch.trapz(self.value(overlaps), x=self.Xaxis) * 100 / self.max_overlap
 
     def update(self, val):
         self.overlaps.append(val)

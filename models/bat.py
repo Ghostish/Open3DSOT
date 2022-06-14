@@ -14,7 +14,7 @@ from datasets import points_utils
 from pointnet2.utils import pytorch_utils as pt_utils
 
 
-class BAT(base_model.BaseModel):
+class BAT(base_model.MatchingBaseModel):
     def __init__(self, config=None, **kwargs):
         super().__init__(config, **kwargs)
         self.save_hyperparameters()

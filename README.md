@@ -1,7 +1,7 @@
 # Open3DSOT
 A general python framework for single object tracking in LiDAR point clouds, based on PyTorch Lightning.
 
-The official code release of **[BAT](https://arxiv.org/abs/2108.04728)** and **[MM Track](https://ghostish.github.io/MM-Track/)**.
+The official code release of **[BAT](https://arxiv.org/abs/2108.04728)** and **[M2 Track](https://ghostish.github.io/MM-Track/)**.
 
 
 ### Features
@@ -10,15 +10,17 @@ The official code release of **[BAT](https://arxiv.org/abs/2108.04728)** and **[
 + Support all common tracking datasets (KITTI, NuScenes, Waymo Open Dataset).
 
 ### :mega:  One tracking paper is accepted by CVPR2022 (Oral)! :point_down:
-+ [Beyond 3D Siamese Tracking: A Motion-Centric Paradigm for 3D Single Object Tracking in Point Clouds](https://arxiv.org/abs/2203.01730) | Code coming here soon...
++ [Beyond 3D Siamese Tracking: A Motion-Centric Paradigm for 3D Single Object Tracking in Point Clouds](https://arxiv.org/abs/2203.01730)
 
+### :mega: The codes for M2-Track is now available.
++ The checkpoints we provide here achieve better performances than those reported in our main paper. Check below for more details.
 ## Trackers
 This repository includes the implementation of the following models:
 
-### MM-Track (CVPR2022 Oral)
+### M2-Track (CVPR2022 Oral)
 **[[Paper]](http://arxiv.org/abs/2203.01730)** **[[Project Page]](https://ghostish.github.io/MM-Track/)**
 
-**MM-Track** is the first **motion-centric tracker** in LiDAR SOT, which robustly handles distractors and drastic appearance changes in complex driving scenes.  Unlike previous methods, MM-Track is a **matching-free** two-stage tracker which localizes the targets by explicitly modeling the "relative target motion" among frames.
+**M2-Track** is the first **motion-centric tracker** in LiDAR SOT, which robustly handles distractors and drastic appearance changes in complex driving scenes.  Unlike previous methods, M2-Track is a **matching-free** two-stage tracker which localizes the targets by explicitly modeling the "relative target motion" among frames.
 
 <p align="center">
 <img src="figures/mmtrack.png" width="800"/>
@@ -60,18 +62,15 @@ Installation
   ```
 + Install pytorch
   ```
-  conda install pytorch==1.4.0 torchvision==0.5.0 cudatoolkit=10.1 -c pytorch
+  conda install pytorch==1.7.1 torchvision==0.8.2 torchaudio==0.7.2 cudatoolkit=11.0 -c pytorch
   ```
-  Our code is well tested with pytorch 1.4.0 and CUDA 10.1. But other platforms may also work. Follow [this](https://pytorch.org/get-started/locally/) to install another version of pytorch. **Note: In order to reproduce the reported results with the provided checkpoints, please use CUDA 10.x.** 
+  Our code is compatible with other PyTorch/CUDA versions. You can follow [this](https://pytorch.org/get-started/locally/) to install another version of pytorch. **Note: In order to reproduce the reported results with the provided checkpoints of BAT, please use CUDA 10.x.** 
 
 + Install other dependencies:
   ```
   pip install -r requirement.txt
   ```
-  Install the nuscenes-devkit if you use want to use NuScenes dataset:
-  ```
-  pip install nuscenes-devkit
-  ```
+
 
 KITTI dataset
 + Download the data for [velodyne](http://www.cvlibs.net/download.php?file=data_tracking_velodyne.zip), [calib](http://www.cvlibs.net/download.php?file=data_tracking_calib.zip) and [label_02](http://www.cvlibs.net/download.php?file=data_tracking_label_2.zip) from [KITTI Tracking](http://www.cvlibs.net/datasets/kitti/eval_tracking.php).
@@ -117,10 +116,14 @@ Waymo dataset
 
 ## Quick Start
 ### Training
-To train a model, you must specify the `.yaml` file with `--cfg` argument. The `.yaml` file contains all the configurations of the dataset and the model. Currently, we provide four `.yaml` files under the [*cfgs*](./cfgs) directory. **Note:** Before running the code, you will need to edit the `.yaml` file by setting the `path` argument as the correct root of the dataset.
+To train a model, you must specify the `.yaml` file with `--cfg` argument. The `.yaml` file contains all the configurations of the dataset and the model. We provide `.yaml` files under the [*cfgs*](./cfgs) directory. **Note:** Before running the code, you will need to edit the `.yaml` file by setting the `path` argument as the correct root of the dataset.
 ```bash
-python main.py --gpu 0 1 --cfg cfgs/BAT_Car.yaml  --batch_size 50 --epoch 60 --preloading
+CUDA_VISIBLE_DEVICES=0,1 python main.py  --cfg cfgs/M2_track_kitti.yaml  --batch_size 64 --epoch 60 --preloading
 ```
+For M2-Track, we use the same configuration for all categories. By default, the `.yaml` is used to trained a Car tracker. You need to change the `category_name` in the `.yaml` file to train for another category.
+
+In this version, we remove the `--gpus` flag. And all the available GPUs will be used by default. You can use `CUDA_VISIBLE_DEVICES` to select specific GPUs.
+
 After you start training, you can start Tensorboard to monitor the training process:
 ```
 tensorboard --logdir=./ --port=6006
@@ -129,7 +132,7 @@ By default, the trainer runs a full evaluation on the full test split after trai
 ### Testing
 To test a trained model, specify the checkpoint location with `--checkpoint` argument and send the `--test` flag to the command.
 ```bash
-python main.py --gpu 0 1 --cfg cfgs/BAT_Car.yaml  --checkpoint /path/to/checkpoint/xxx.ckpt --test
+python main.py  --cfg cfgs/M2_track_kitti.yaml  --checkpoint /path/to/checkpoint/xxx.ckpt --test
 ```
 
 ## Reproduction
@@ -138,12 +141,14 @@ python main.py --gpu 0 1 --cfg cfgs/BAT_Car.yaml  --checkpoint /path/to/checkpoi
 | BAT-KITTI | Car	|65.37 | 78.88|pretrained_models/bat_kitti_car.ckpt
 | BAT-NuScenes | Car	|40.73 | 43.29|pretrained_models/bat_nuscenes_car.ckpt
 | BAT-KITTI | Pedestrian | 45.74| 74.53| pretrained_models/bat_kitti_pedestrian.ckpt
+| M2Track-KITTI | Car | **67.43**| **81.04**| pretrained_models/mmtrack_kitti_car.ckpt
+| M2Track-KITTI | Pedestrian | **60.61**| **89.39**| pretrained_models/mmtrack_kitti_pedestrian.ckpt
 
-Three trained BAT models for KITTI and NuScenes datasets are provided in the  [*pretrained_models*](./pretrained_models) directory. To reproduce the results, simply run the code with the corresponding `.yaml` file and checkpoint. For example, to reproduce the tracking results on KITTI Car, just run:
+Trained models are provided in the  [*pretrained_models*](./pretrained_models) directory. To reproduce the results, simply run the code with the corresponding `.yaml` file and checkpoint. For example, to reproduce the tracking results on KITTI Car of M2-Track, just run:
 ```bash
-python main.py --gpu 0 1 --cfg cfgs/BAT_Car.yaml  --checkpoint ./pretrained_models/bat_kitti_car.ckpt --test
+python main.py  --cfg cfgs/M2_track_kitti.yaml  --checkpoint ./pretrained_models/mmtrack_kitti_car.ckpt --test
 ```
-
+The reported results of M2-Track checkpoints are produced on 3090/3080ti GPUs. Due to the precision issues, there could be minor differences if you test them with other GPUs.
 
 ## Acknowledgment
 + This repo is built upon [P2B](https://github.com/HaozheQi/P2B) and [SC3D](https://github.com/SilvioGiancola/ShapeCompletion3DTracking).

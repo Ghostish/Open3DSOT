@@ -1,0 +1,52 @@
+#data
+dataset: nuscenes
+path:  #put data root here
+version: v1.0-trainval
+category_name: Car
+bb_scale: 1.25
+bb_offset: 2
+point_sample_size: 1024
+degrees: False
+coordinate_mode: velodyne
+up_axis: [0,0,1]
+preload_offset: 10
+data_limit_box: True
+key_frame_only: True
+train_split: train_track
+val_split: val
+test_split: val
+train_type: train_motion
+num_candidates: 4
+motion_threshold: 0.15
+use_augmentation: True
+
+
+#model configuration
+net_model: m2track
+box_aware: True
+
+#loss configuration
+center_weight: 2
+angle_weight: 10.0
+seg_weight: 0.1
+bc_weight: 1
+
+motion_cls_seg_weight: 0.1
+
+
+# testing config
+use_z: True
+limit_box: False
+IoU_space: 3
+
+#training
+batch_size: 100
+workers: 10
+epoch: 180
+from_epoch: 0
+lr: 0.001
+optimizer: Adam
+lr_decay_step: 20
+lr_decay_rate: 0.1
+wd: 0
+gradient_clip_val: 0.0

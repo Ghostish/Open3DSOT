@@ -1,4 +1,4 @@
-""" 
+"""
 nuscenes.py
 Created by zenn at 2021/9/1 15:05
 """
@@ -6,13 +6,10 @@ import os
 
 import numpy as np
 import pickle
-try:
-    import nuscenes
-    from nuscenes.nuscenes import NuScenes
-    from nuscenes.utils.data_classes import LidarPointCloud, Box
-    from nuscenes.utils.splits import create_splits_scenes
-except ModuleNotFoundError:
-    print("Nuscenes utils are not installed")
+import nuscenes
+from nuscenes.nuscenes import NuScenes
+from nuscenes.utils.data_classes import LidarPointCloud, Box
+from nuscenes.utils.splits import create_splits_scenes
 
 from pyquaternion import Quaternion
 
@@ -154,7 +151,6 @@ class NuScenesDataset(base_dataset.BaseDataset):
 
         return frames
 
-
     def _get_frame_from_anno_data(self, anno):
         sample_data_lidar = anno['sample_data_lidar']
         box_anno = anno['box_anno']
@@ -175,5 +171,3 @@ class NuScenesDataset(base_dataset.BaseDataset):
         if self.preload_offset > 0:
             pc = points_utils.crop_pc_axis_aligned(pc, bb, offset=self.preload_offset)
         return {"pc": pc, "3d_bbox": bb, 'meta': anno}
-
-

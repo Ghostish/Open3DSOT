@@ -19,6 +19,8 @@ train_split: train
 val_split: test
 test_split: test
 preload_offset: 10
+train_type: train_siamese
+data_limit_box: True
 
 #model configuration
 net_model: BAT
@@ -58,3 +60,4 @@ optimizer: Adam
 lr_decay_step: 12
 lr_decay_rate: 0.2
 wd: 0
+gradient_clip_val: 0.0

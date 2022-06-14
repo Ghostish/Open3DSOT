@@ -1,6 +1,6 @@
 #data
 dataset: kitti
-path: #put the root of the dataset here
+path:  #put data root here
 category_name: Car # [Car, Van, Pedestrian, Cyclist, All]
 search_bb_scale: 1.25
 search_bb_offset: 2
@@ -19,6 +19,8 @@ train_split: train
 val_split: test
 test_split: test
 preload_offset: 10
+train_type: train_siamese
+data_limit_box: False
 
 #model configuration
 net_model: BAT
@@ -58,3 +60,4 @@ optimizer: Adam
 lr_decay_step: 12
 lr_decay_rate: 0.2
 wd: 0
+gradient_clip_val: 0.0

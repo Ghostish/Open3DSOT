@@ -1,10 +1,10 @@
-# Created by zenn at 2021/5/6
+import nuscenes.utils.geometry_utils
 import torch
 import os
 import copy
 import numpy as np
 from pyquaternion import Quaternion
-from datasets.data_classes import PointCloud
+from datasets.data_classes import PointCloud, Box
 from scipy.spatial.distance import cdist
 
 
@@ -40,11 +40,13 @@ def regularize_pc(points, sample_size, seed=None):
     return points, new_pts_idx
 
 
-def getOffsetBB(box, offset, degrees=True, use_z=False, limit_box=True):
+def getOffsetBB(box, offset, degrees=True, use_z=False, limit_box=True, inplace=False):
     rot_quat = Quaternion(matrix=box.rotation_matrix)
     trans = np.array(box.center)
-
-    new_box = copy.deepcopy(box)
+    if not inplace:
+        new_box = copy.deepcopy(box)
+    else:
+        new_box = box
 
     new_box.translate(-trans)
     new_box.rotate(rot_quat.inverse)
@@ -114,6 +116,7 @@ def cropAndCenterPC(PC, box, offset=0, scale=1.0, normalize=False):
     new_PC.rotate((rot_mat))
     new_box.rotate(Quaternion(matrix=(rot_mat)))
 
+    # crop around box
     new_PC = crop_pc_axis_aligned(new_PC, new_box, offset=offset, scale=scale)
 
     if normalize:
@@ -121,7 +124,7 @@ def cropAndCenterPC(PC, box, offset=0, scale=1.0, normalize=False):
     return new_PC, new_box
 
 
-def get_point_to_box_distance(pc, box):
+def get_point_to_box_distance(pc, box, wlh_factor=1.0):
     """
     generate the BoxCloud for the given pc and box
     :param pc: Pointcloud object or numpy array
@@ -133,7 +136,7 @@ def get_point_to_box_distance(pc, box):
     else:
         points = pc  # N,3
         assert points.shape[1] == 3
-    box_corners = box.corners()  # 3,8
+    box_corners = box.corners(wlh_factor=wlh_factor)  # 3,8
     box_centers = box.center.reshape(-1, 1)  # 3,1
     box_points = np.concatenate([box_centers, box_corners], axis=1)  # 3,9
     points2cc_dist = cdist(points, box_points.T)  # N,9
@@ -247,11 +250,20 @@ def generate_subwindow(pc, sample_bb, scale, offset=2, oriented=True):
     return new_pc
 
 
-def transform_box(box, ref_box):
-    box = copy.deepcopy(box)
+def transform_box(box, ref_box, inplace=False):
+    if not inplace:
+        box = copy.deepcopy(box)
     box.translate(-ref_box.center)
     box.rotate(Quaternion(matrix=ref_box.rotation_matrix.T))
     return box
+
+
+def transform_pc(pc, ref_box, inplace=False):
+    if not inplace:
+        pc = copy.deepcopy(pc)
+    pc.translate(-ref_box.center)
+    pc.rotate(ref_box.rotation_matrix.T)
+    return pc
 
 
 def get_in_box_mask(PC, box):
@@ -282,4 +294,163 @@ def get_in_box_mask(PC, box):
     close = np.logical_and(close, z_filt_min)
     close = np.logical_and(close, z_filt_max)
     return close
+
+
+def apply_transform(in_box_pc, box, translation, rotation, flip_x, flip_y, rotation_axis=(0, 0, 1)):
+    """
+    Apply transformation to the box and its pc insides. pc should be inside the given box.
+    :param in_box_pc: PointCloud object
+    :param box: Box object
+    :param flip_y: boolean
+    :param flip_x: boolean
+    :param rotation_axis: 3-element tuple. The rotation axis
+    :param translation: <np.float: 3, 1>. Translation in x, y, z direction.
+    :param rotation: float. rotation in degrees
+    :return:
+    """
+
+    # get inverse transform
+    rot_mat = box.rotation_matrix
+    trans = box.center
+
+    new_box = copy.deepcopy(box)
+    new_pc = copy.deepcopy(in_box_pc)
+
+    new_pc.translate(-trans)
+    new_box.translate(-trans)
+    new_pc.rotate(rot_mat.T)
+    new_box.rotate(Quaternion(matrix=rot_mat.T))
+
+    if flip_x:
+        new_pc.points[0, :] = -new_pc.points[0, :]
+        # rotate the box to make sure that the x-axis is point to the head
+        new_box.rotate(Quaternion(axis=[0, 0, 1], degrees=180))
+    if flip_y:
+        new_pc.points[1, :] = -new_pc.points[1, :]
+
+    # apply rotation
+    rot_quat = Quaternion(axis=rotation_axis, degrees=rotation)
+    new_box.rotate(rot_quat)
+    new_pc.rotate(rot_quat.rotation_matrix)
+
+    # apply translation
+    new_box.translate(translation)
+    new_pc.translate(translation)
+
+    # transform back
+    new_box.rotate(Quaternion(matrix=rot_mat))
+    new_pc.rotate(rot_mat)
+    new_box.translate(trans)
+    new_pc.translate(trans)
+    return new_pc, new_box
+
+
+def apply_augmentation(pc, box, wlh_factor=1.25):
+    in_box_mask = nuscenes.utils.geometry_utils.points_in_box(box, pc.points, wlh_factor=wlh_factor)
+    # in_box_mask = get_in_box_mask(pc, box)
+    in_box_pc = PointCloud(pc.points[:, in_box_mask])
+
+    rand_trans = np.random.uniform(low=-0.3, high=0.3, size=3)
+    rand_rot = np.random.uniform(low=-10, high=10)
+    flip_x, flip_y = np.random.choice([True, False], size=2, replace=True)
+
+    new_in_box_pc, new_box = apply_transform(in_box_pc, box, rand_trans, rand_rot, flip_x, flip_y)
+
+    new_pc = copy.deepcopy(pc)
+    new_pc.points[:, in_box_mask] = new_in_box_pc.points
+    return new_pc, new_box
+
+
+def roty_batch_tensor(t):
+    input_shape = t.shape
+    output = torch.zeros(tuple(list(input_shape) + [3, 3]), dtype=torch.float32, device=t.device)
+    c = torch.cos(t)
+    s = torch.sin(t)
+    output[..., 0, 0] = c
+    output[..., 0, 2] = s
+    output[..., 1, 1] = 1
+    output[..., 2, 0] = -s
+    output[..., 2, 2] = c
+    return output
+
+
+def rotz_batch_tensor(t):
+    input_shape = t.shape
+    output = torch.zeros(tuple(list(input_shape) + [3, 3]), dtype=torch.float32, device=t.device)
+    c = torch.cos(t)
+    s = torch.sin(t)
+    output[..., 0, 0] = c
+    output[..., 0, 1] = -s
+    output[..., 1, 0] = s
+    output[..., 1, 1] = c
+    output[..., 2, 2] = 1
+    return output
+
+
+def get_offset_points_tensor(points, ref_box_params, offset_box_params):
+    """
+
+    :param points: B,N,3
+    :param ref_box_params: B,4
+    :return:
+    """
+    ref_center = ref_box_params[:, :3]
+    ref_rot_angles = ref_box_params[:, -1]
+    offset_center = offset_box_params[:, :3]
+    offset_rot_angles = offset_box_params[:, -1]
+
+    # transform to object coordinate system defined by the ref_box_params
+    rot_mat = rotz_batch_tensor(-ref_rot_angles)  # B,3,3
+    points -= ref_center[:, None, :]  # B,N,3
+    points = torch.matmul(points, rot_mat.transpose(1, 2))
+
+    # apply the offset
+    rot_mat_offset = rotz_batch_tensor(offset_rot_angles)
+    points = torch.matmul(points, rot_mat_offset.transpose(1, 2))
+    points += offset_center[:, None, :]
+
+    # # transform back to world coordinate
+    points = torch.matmul(points, rot_mat)
+    points += ref_center[:, None, :]
+    return points
+
+
+def get_offset_box_tensor(ref_box_params, offset_box_params):
+    """
+    transform the ref_box with the give offset
+    :param ref_box_params: B,4
+    :param offset_box_params: B,4
+    :return: B,4
+    """
+    ref_center = ref_box_params[:, :3]  # B,3
+    ref_rot_angles = ref_box_params[:, -1]  # B,
+    offset_center = offset_box_params[:, :3]
+    offset_rot_angles = offset_box_params[:, -1]
+    rot_mat = rotz_batch_tensor(ref_rot_angles)  # B,3,3
+
+    new_center = torch.matmul(rot_mat, offset_center[..., None]).squeeze(dim=-1)  # B,3
+    new_center += ref_center
+    new_angle = ref_rot_angles + offset_rot_angles
+    return torch.cat([new_center, new_angle[:, None]], dim=-1)
+
+
+def remove_transform_points_tensor(points, ref_box_params):
+    """
+
+    :param points: B,N,3
+    :param ref_box_params: B,4
+    :return:
+    """
+    ref_center = ref_box_params[:, :3]
+    ref_rot_angles = ref_box_params[:, -1]
+
+    # transform to object coordinate system defined by the ref_box_params
+    rot_mat = rotz_batch_tensor(-ref_rot_angles)  # B,3,3
+    points -= ref_center[:, None, :]  # B,N,3
+    points = torch.matmul(points, rot_mat.transpose(1, 2))
+    return points
+
+
+def np_to_torch_tensor(data, device=None):
+    return torch.tensor(data, device=device).unsqueeze(dim=0)
 

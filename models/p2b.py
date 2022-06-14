@@ -10,7 +10,7 @@ from models.head.rpn import P2BVoteNetRPN
 from models import base_model
 
 
-class P2B(base_model.BaseModel):
+class P2B(base_model.MatchingBaseModel):
     def __init__(self, config=None, **kwargs):
         super().__init__(config, **kwargs)
         self.save_hyperparameters()
