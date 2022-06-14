@@ -143,6 +143,7 @@ python main.py  --cfg cfgs/M2_track_kitti.yaml  --checkpoint /path/to/checkpoint
 | BAT-KITTI | Pedestrian | 45.74| 74.53| pretrained_models/bat_kitti_pedestrian.ckpt
 | M2Track-KITTI | Car | **67.43**| **81.04**| pretrained_models/mmtrack_kitti_car.ckpt
 | M2Track-KITTI | Pedestrian | **60.61**| **89.39**| pretrained_models/mmtrack_kitti_pedestrian.ckpt
+| M2Track-NuScenes | Car | **57.22**| **65.72**| pretrained_models/mmtrack_nuscenes_car.ckpt
 
 Trained models are provided in the  [*pretrained_models*](./pretrained_models) directory. To reproduce the results, simply run the code with the corresponding `.yaml` file and checkpoint. For example, to reproduce the tracking results on KITTI Car of M2-Track, just run:
 ```bash
