@@ -13,7 +13,8 @@ The official code release of **[BAT](https://arxiv.org/abs/2108.04728)** and **[
 + [Beyond 3D Siamese Tracking: A Motion-Centric Paradigm for 3D Single Object Tracking in Point Clouds](https://arxiv.org/abs/2203.01730)
 
 ### :mega: The codes for M2-Track is now available.
-+ The checkpoints we provide here achieve better performances than those reported in our main paper. Check below for more details.
++ The checkpoints we provide here achieve **better** performances than those reported in our main paper. Check below for more details.
++ The supplementary material is now out. Please check [this](https://openaccess.thecvf.com/content/CVPR2022/supplemental/Zheng_Beyond_3D_Siamese_CVPR_2022_supplemental.pdf) for more implementation details.
 ## Trackers
 This repository includes the implementation of the following models:
 
