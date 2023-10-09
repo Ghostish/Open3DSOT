@@ -8,6 +8,11 @@ The official code release of **[BAT](https://arxiv.org/abs/2108.04728)** and **[
 + Modular design. It is easy to config the model and training/testing behaviors through just a `.yaml` file.
 + DDP support for both training and testing.
 + Support all common tracking datasets (KITTI, NuScenes, Waymo Open Dataset).
+### :mega:  The extension of M2-Track is accepted by TPAMI! :point_down:
++ [An Effective Motion-Centric Paradigm for 3D Single Object Tracking in Point Clouds
+](https://arxiv.org/abs/2303.12535)
+
++ Codes are coming soon.
 
 ### :mega:  One tracking paper is accepted by CVPR2022 (Oral)! :point_down:
 + [Beyond 3D Siamese Tracking: A Motion-Centric Paradigm for 3D Single Object Tracking in Point Clouds](https://arxiv.org/abs/2203.01730)
